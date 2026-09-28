@@ -5,12 +5,12 @@
 
 {if $link}
     <p>
-    {"A mail has been sent to the following email address: %1. This email contains a link you need to click so that we can confirm that the correct user is getting the new password."|i18n('mbpaex/userpaex/forgotpassword',,array($email))}
+    {"If an account is registered with the email address %1, a mail has been sent to it. This email contains a link you need to click so that we can confirm that the correct user is getting the new password."|i18n('design/standard/user/forgotpassword',,array($email|wash))}
     </p>
 {else}
     {if $wrong_email}
         <div class="warning">
-            <h2>{"There is no registered user with that email address."|i18n('mbpaex/userpaex/forgotpassword')}</h2>
+            <h2>{"Please enter a valid email address."|i18n('design/standard/user/forgotpassword')}</h2>
         </div>
     {/if}
     {if $password_form}
@@ -55,7 +55,7 @@
                 
                 <div class="buttonblock">
                     <input class="button" type="submit" name="ChangePasswdButton" value="{'Change password'|i18n('mbpaex/userpaex/forgotpassword')}" />
-                    <input type="hidden" name="HashKey" value="{$HashKey}" />
+                    <input type="hidden" name="HashKey" value="{$HashKey|wash}" />
                 </div>
             </form>
         {/if}

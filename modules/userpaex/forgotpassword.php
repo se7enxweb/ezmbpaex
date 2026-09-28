@@ -70,10 +70,13 @@ if ( $module->isCurrentAction( "Generate" ) )
     $password = eZUser::createPassword( $passwordLength );
     $passwordConfirm = $password;
 
-    if ( $module->hasActionParameter( "Email" ) && eZMail::validate($module->actionParameter( "Email" )) )
+    if ( $module->hasActionParameter( "Email" ) )
     {
         $email = $module->actionParameter( "Email" );
-        if ( trim( $email ) != "" )
+        // A form can post the address as an array; treat that as not given
+        if ( !is_string( $email ) ) $email = "";
+        $users = array();
+        if ( trim( $email ) != "" && eZMail::validate( $email ) )
         {
             $users = eZPersistentObject::fetchObjectList( eZUser::definition(),
                                                        null,
@@ -135,12 +138,24 @@ if ( $module->isCurrentAction( "Generate" ) )
                                                                'Comment' => 'Forgotpassword email sent' ) );
 
         }
-        else
+        else if ( trim( $email ) !== '' && eZMail::validate( trim( $email ) )
+                  && !preg_match( '/[<>"\'&\\\\]/', $email ) )
         {
             // if audit is enabled password changes should be logged
             eZAudit::writeAudit( 'user-forgotpassword-fail', array( 'Email' => $email,
                                                                     'Comment' => 'Email address not found' ) );
 
+            // No user has this address. Answer exactly as for one that
+            // does, so the form cannot be used to find out which addresses
+            // have an account. The address is echoed by the page, and older
+            // designs print it unescaped, so only a plain address (no quoted
+            // local part, nothing HTML could read as markup) gets this far.
+            $tpl->setVariable( 'link', true );
+            $tpl->setVariable( 'email', $email );
+        }
+        else
+        {
+            // Not an email address at all: saying so reveals nothing.
             $tpl->setVariable( 'wrong_email', $email );
         }
     }
