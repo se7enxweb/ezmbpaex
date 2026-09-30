@@ -89,7 +89,10 @@ if ( $module->isCurrentAction( "Generate" ) )
         {
             $user = $users[0];
             $time = time();
-            $hashKey = md5( $time . ":" . mt_rand() );
+            // The key is all that stands between a reset link and the account: 128 random bits from the
+            // system's secure source, 32 hex characters like the md5 it replaces (mt_rand() and the time
+            // could be guessed)
+            $hashKey = bin2hex( random_bytes( 16 ) );
 
             $db = eZDB::instance();
             $db->begin();
