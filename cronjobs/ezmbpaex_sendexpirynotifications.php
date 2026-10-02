@@ -1,4 +1,5 @@
 <?php
+// @description Send the pending password expiry notifications
 /**
  * File containing the sendexpirynotifications CLI script
  *

@@ -1,4 +1,5 @@
 <?php
+// @description Apply the pending password expiry updates to the children of the ezpaex objects
 /**
  * File containing the updatechildren CLI script
  *
