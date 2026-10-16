@@ -47,10 +47,10 @@
                 <div class="block">
                     <label for="password">{"Password"|i18n('mbpaex/userpaex/forgotpassword')}:</label>
                     <div class="labelbreak"></div>
-                    <input class="halfbox" type="password" name="NewPassword" size="20" value="" />
-                    <label for="password">{"Password Confirm"|i18n('mbpaex/userpaex/forgotpassword')}:</label>
+                    <input id="password" class="halfbox" type="password" name="NewPassword" size="20" value="" />
+                    <label for="passwordconfirm">{"Password Confirm"|i18n('mbpaex/userpaex/forgotpassword')}:</label>
                     <div class="labelbreak"></div>
-                    <input class="halfbox" type="password" name="NewPasswordConfirm" size="20" value="" />
+                    <input id="passwordconfirm" class="halfbox" type="password" name="NewPasswordConfirm" size="20" value="" />
                 </div>
                 
                 <div class="buttonblock">
@@ -77,7 +77,7 @@
                 <div class="block">
                     <label for="email">{"Email"|i18n('mbpaex/userpaex/forgotpassword')}:</label>
                     <div class="labelbreak"></div>
-                    <input class="halfbox" type="text" name="UserEmail" size="40" value="{$wrong_email|wash}" />
+                    <input id="email" class="halfbox" type="text" name="UserEmail" size="40" value="{$wrong_email|wash}" />
                 </div>
                 
                 <div class="buttonblock">

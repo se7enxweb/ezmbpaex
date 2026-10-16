@@ -17,7 +17,7 @@
 {if and( ne( $ui_context, 'edit' ), ne( $ui_context, 'browse' ) )}
 
 {let current_user_link=$current_user.contentobject.main_node.url_alias|ezurl}
-<p><a href={$current_user_link}><img src={'current-user.gif'|ezimage} height="22" width="22" alt="" style="text-align: left; vertical-align: middle;" /></a>&nbsp;<a style="font-weight: normal; text-decoration: none; color: #000000" href={$current_user_link}>{$current_user.contentobject.name|wash}</a></p>
+<p><img src={'current-user.gif'|ezimage} height="22" width="22" alt="" class="a4-middle" />&nbsp;<a class="a4-current-user-name" href={$current_user_link}>{$current_user.contentobject.name|wash}</a></p>
 {/let}
 
 <ul>
@@ -38,7 +38,7 @@
 <li><div><a href={'/user/logout'|ezurl} title="{'Logout from the system.'|i18n( 'design/admin/pagelayout' )}">{'Logout'|i18n( 'design/admin/pagelayout' )}</a></div></li>
 </ul>
 {else}
-    <p><img src={'current-user-disabled.gif'|ezimage} height="22" width="22" alt="" style="text-align: left; vertical-align: middle;" /> {$current_user.contentobject.name|wash}</p>
+    <p><img src={'current-user-disabled.gif'|ezimage} height="22" width="22" alt="" class="a4-middle" /> {$current_user.contentobject.name|wash}</p>
     <ul>
     <li><div><span class="disabled">{'Change user info'|i18n( 'design/admin/pagelayout' )}</span></div></li>
     <li><div><span class="disabled">{'Change password'|i18n( 'design/admin/pagelayout' )}</span></div></li>
