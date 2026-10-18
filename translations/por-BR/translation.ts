@@ -87,7 +87,7 @@
     </message>
     <message>
         <source>Change name, email, password, etc.</source>
-        <translation>Mudar nome, email, senha, etc.</translation>
+        <translation>Mudar nome, e-mail, senha, etc.</translation>
     </message>
     <message>
         <source>Change information</source>
@@ -134,7 +134,7 @@
     </message>
     <message>
         <source>Email</source>
-        <translation>Email</translation>
+        <translation>E-mail</translation>
     </message>
 </context>
 <context>
@@ -333,7 +333,7 @@
     </message>
     <message>
         <source>Email</source>
-        <translation>Email</translation>
+        <translation>E-mail</translation>
     </message>
     <message>
         <source>Generate new password</source>
