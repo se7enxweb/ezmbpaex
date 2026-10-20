@@ -134,7 +134,7 @@
     </message>
     <message>
         <source>Email</source>
-        <translation>Email</translation>
+        <translation>E-pošta</translation>
     </message>
 </context>
 <context>
@@ -329,7 +329,7 @@
     </message>
     <message>
         <source>The key is invalid or has been used. </source>
-        <translation>Ključ je neispravan ili je već iskorišten.</translation>
+        <translation>Ključ nije valjan ili je već iskorišten. </translation>
     </message>
     <message>
         <source>Have you forgotten your password?</source>
@@ -341,7 +341,7 @@
     </message>
     <message>
         <source>Email</source>
-        <translation>Email</translation>
+        <translation>E-pošta</translation>
     </message>
     <message>
         <source>Generate new password</source>

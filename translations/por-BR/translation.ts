@@ -134,7 +134,7 @@
     </message>
     <message>
         <source>Email</source>
-        <translation>Email</translation>
+        <translation>E-mail</translation>
     </message>
 </context>
 <context>
@@ -245,6 +245,10 @@
         <translation>A senha não é válida, por favor redigite sua nova senha.</translation>
     </message>
     <message>
+        <source>New password must be different from the old one. Please choose another password.</source>
+        <translation>A nova senha deve ser diferente da antiga. Por favor, escolha outra senha.</translation>
+    </message>
+    <message>
         <source>Password successfully updated.</source>
         <translation>A senha foi modificada com sucesso.</translation>
     </message>
@@ -269,20 +273,20 @@
         <translation>Cancelar</translation>
     </message>
     <message>
-        <source>Your password is about to expire</source>
-        <translation>Sua senha está prestes a expirar</translation>
-    </message>
-    <message>
         <source>%siteurl your password is about to expire</source>
         <translation>%siteurl sua senha está prestes a expirar</translation>
     </message>
     <message>
-        <source>New password must be different from the old one. Please choose another password.</source>
-        <translation>A nova senha deve ser diferente da antiga. Por favor, escolha outra senha.</translation>
+        <source>Your password is about to expire</source>
+        <translation>Sua senha está prestes a expirar</translation>
     </message>
 </context>
 <context>
     <name>mbpaex/userpaex/forgotpassword</name>
+    <message>
+        <source>Click here to set your new password</source>
+        <translation>Clique aqui para definir sua nova senha</translation>
+    </message>
     <message>
         <source>A mail has been sent to the following email address: %1. This email contains a link you need to click so that we can confirm that the correct user is getting the new password.</source>
         <translation>Um e-mail foi enviado para o endereço de e-mail %1. O e-mail contém um link no qual você deve clicar para confirmar que o usuário correto está recebendo a nova senha.</translation>
@@ -302,6 +306,10 @@
     <message>
         <source>The new password is invalid, please choose new one.</source>
         <translation>A nova senha é inválida, por favor escolha uma nova.</translation>
+    </message>
+    <message>
+        <source>Choose a new password</source>
+        <translation>Escolha uma nova senha</translation>
     </message>
     <message>
         <source>Enter your desired new password in the form below.</source>
@@ -333,7 +341,7 @@
     </message>
     <message>
         <source>Email</source>
-        <translation>Email</translation>
+        <translation>E-mail</translation>
     </message>
     <message>
         <source>Generate new password</source>
@@ -344,16 +352,8 @@
         <translation>%siteurl senha esquecida</translation>
     </message>
     <message>
-        <source>Click here to set your new password</source>
-        <translation>Clique aqui para definir sua nova senha</translation>
-    </message>
-    <message>
         <source>This link is valid until %1, after that time you should generate a new one.</source>
         <translation>Este link é válido até %1, após esse prazo você deve gerar um novo.</translation>
-    </message>
-    <message>
-        <source>Choose a new password</source>
-        <translation>Escolha uma nova senha</translation>
     </message>
 </context>
 </TS>

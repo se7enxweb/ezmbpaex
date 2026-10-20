@@ -123,7 +123,7 @@
     </message>
     <message>
         <source>Logout</source>
-        <translation>Logout</translation>
+        <translation>Esci</translation>
     </message>
 </context>
 <context>
@@ -134,7 +134,7 @@
     </message>
     <message>
         <source>Email</source>
-        <translation>Email</translation>
+        <translation>E-mail</translation>
     </message>
 </context>
 <context>
@@ -329,7 +329,7 @@
     </message>
     <message>
         <source>The key is invalid or has been used. </source>
-        <translation>La chiave non è valida o è stata usata.</translation>
+        <translation>La chiave non è valida o è già stata usata. </translation>
     </message>
     <message>
         <source>Have you forgotten your password?</source>
@@ -341,7 +341,7 @@
     </message>
     <message>
         <source>Email</source>
-        <translation>Email</translation>
+        <translation>E-mail</translation>
     </message>
     <message>
         <source>Generate new password</source>
