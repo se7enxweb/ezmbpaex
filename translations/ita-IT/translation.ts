@@ -87,7 +87,7 @@
     </message>
     <message>
         <source>Change name, email, password, etc.</source>
-        <translation>Cambia nome, email, password, ecc.</translation>
+        <translation>Cambia nome, e-mail, password, ecc.</translation>
     </message>
     <message>
         <source>Change information</source>
@@ -289,7 +289,7 @@
     </message>
     <message>
         <source>A mail has been sent to the following email address: %1. This email contains a link you need to click so that we can confirm that the correct user is getting the new password.</source>
-        <translation>E&apos; stata inviata un&apos;email al seguente indirizzo email: %1. Quest&apos;email contiene un link che devi cliccare per darci la conferma che l&apos;utente giusto ha ricevuto la nuova password.</translation>
+        <translation>È stata inviata un&apos;e-mail al seguente indirizzo e-mail: %1. Quest&apos;e-mail contiene un link che devi cliccare per darci la conferma che l&apos;utente giusto ha ricevuto la nuova password.</translation>
     </message>
     <message>
         <source>There is no registered user with that email address.</source>
@@ -337,7 +337,7 @@
     </message>
     <message>
         <source>If you have forgotten your password we can generate a new one for you. All you need to do is to enter your email address and we will create a new password for you.</source>
-        <translation>Se hai dimenticato la tua password possiamo generartene un&apos;altra. Devi solo inserire il tuo indirizzo email e noi ti creeremo una nuova password.</translation>
+        <translation>Se hai dimenticato la tua password possiamo generartene un&apos;altra. Devi solo inserire il tuo indirizzo e-mail e noi ti creeremo una nuova password.</translation>
     </message>
     <message>
         <source>Email</source>
