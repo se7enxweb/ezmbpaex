@@ -230,7 +230,7 @@
     <name>mbpaex/userpaex</name>
     <message>
         <source>Change password for user</source>
-        <translation>Trocar senha de usuario</translation>
+        <translation>Trocar senha de usuário</translation>
     </message>
     <message>
         <source>Please retype your old password.</source>

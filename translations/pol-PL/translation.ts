@@ -9,7 +9,7 @@
     </message>
     <message>
         <source>Manage versions</source>
-        <translation>Zarządzaj wersjami</translation>
+        <translation>Zarządzać wersjami</translation>
     </message>
 </context>
 <context>
@@ -32,7 +32,7 @@
     </message>
     <message>
         <source>Edit</source>
-        <translation>Edytuj</translation>
+        <translation>Edytować</translation>
     </message>
     <message>
         <source>Edit the contents of this item.</source>
@@ -119,7 +119,7 @@
     </message>
     <message>
         <source>Logout from the system.</source>
-        <translation>Wyloguj się z systemu.</translation>
+        <translation>Wylogować się z systemu.</translation>
     </message>
     <message>
         <source>Logout</source>
