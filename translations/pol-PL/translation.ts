@@ -9,7 +9,7 @@
     </message>
     <message>
         <source>Manage versions</source>
-        <translation>Zarządzaj wersjami</translation>
+        <translation>Zarządzać wersjami</translation>
     </message>
 </context>
 <context>
@@ -32,11 +32,11 @@
     </message>
     <message>
         <source>Edit</source>
-        <translation>Edytuj</translation>
+        <translation>Edytować</translation>
     </message>
     <message>
         <source>Edit the contents of this item.</source>
-        <translation>Edytuj zawartość tego elementu.</translation>
+        <translation>Edytować zawartość tego elementu.</translation>
     </message>
     <message>
         <source>Not available</source>
@@ -60,11 +60,11 @@
     </message>
     <message>
         <source>Remove</source>
-        <translation>Usuń</translation>
+        <translation>Usunąć</translation>
     </message>
     <message>
         <source>Remove this item.</source>
-        <translation>Usuń ten element.</translation>
+        <translation>Usunąć ten element.</translation>
     </message>
     <message>
         <source>You do not have permission to remove this item.</source>
@@ -91,11 +91,11 @@
     </message>
     <message>
         <source>Change information</source>
-        <translation>Zmień informacje</translation>
+        <translation>Zmienić informacje</translation>
     </message>
     <message>
         <source>Change user info</source>
-        <translation>Zmień informacje o użytkowniku</translation>
+        <translation>Zmienić informacje o użytkowniku</translation>
     </message>
     <message>
         <source>Change password for &lt;%username&gt;.</source>
@@ -103,7 +103,7 @@
     </message>
     <message>
         <source>Change password</source>
-        <translation>Zmień hasło</translation>
+        <translation>Zmienić hasło</translation>
     </message>
     <message>
         <source>There is %basket_count item in the shopping basket.</source>
@@ -119,11 +119,11 @@
     </message>
     <message>
         <source>Logout from the system.</source>
-        <translation>Wyloguj się z systemu.</translation>
+        <translation>Wylogować się z systemu.</translation>
     </message>
     <message>
         <source>Logout</source>
-        <translation>Wyloguj</translation>
+        <translation>Wylogować</translation>
     </message>
 </context>
 <context>
@@ -149,7 +149,7 @@
     </message>
     <message>
         <source>Change password</source>
-        <translation>Zmień hasło</translation>
+        <translation>Zmienić hasło</translation>
     </message>
 </context>
 <context>
@@ -270,7 +270,7 @@
     </message>
     <message>
         <source>Cancel</source>
-        <translation>Anuluj</translation>
+        <translation>Anulować</translation>
     </message>
     <message>
         <source>%siteurl your password is about to expire</source>
@@ -285,7 +285,7 @@
     <name>mbpaex/userpaex/forgotpassword</name>
     <message>
         <source>Click here to set your new password</source>
-        <translation>Kliknij tutaj, aby ustawić nowe hasło</translation>
+        <translation>Kliknąć tutaj, aby ustawić nowe hasło</translation>
     </message>
     <message>
         <source>A mail has been sent to the following email address: %1. This email contains a link you need to click so that we can confirm that the correct user is getting the new password.</source>
@@ -309,7 +309,7 @@
     </message>
     <message>
         <source>Choose a new password</source>
-        <translation>Wybierz nowe hasło</translation>
+        <translation>Wybrać nowe hasło</translation>
     </message>
     <message>
         <source>Enter your desired new password in the form below.</source>
@@ -325,7 +325,7 @@
     </message>
     <message>
         <source>Change password</source>
-        <translation>Zmień hasło</translation>
+        <translation>Zmienić hasło</translation>
     </message>
     <message>
         <source>The key is invalid or has been used. </source>
@@ -345,7 +345,7 @@
     </message>
     <message>
         <source>Generate new password</source>
-        <translation>Wygeneruj nowe hasło</translation>
+        <translation>Wygenerować nowe hasło</translation>
     </message>
     <message>
         <source>%siteurl forgot password</source>
