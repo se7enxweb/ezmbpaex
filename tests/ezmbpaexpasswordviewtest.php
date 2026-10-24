@@ -8,10 +8,11 @@
  *   php tests/ezmbpaexpasswordviewtest.php
  *
  *  PW-01 - a signed in user changing the own password: through the operation, the session stays the user's, paex reset
- *  PW-02 - a signed in user changing another user's password: the session is not handed to that user
- *  PW-03 - nobody signed in (expired password): the user is signed in after the change, failed logins reset
+ *  PW-02 - a signed in user asking for another user's password form is refused, nothing is checked or changed
+ *  PW-03 - nobody signed in (expired password): the user is signed in after the change, failed logins reset;
+ *          a password that has not expired, or an account without password expiry, is refused
  *  PW-04 - RedirectOnChange and RedirectOnCancel reach redirectTo() only through returnURI()
- *  PW-05 - a wrong old password without a signed in user counts as a failed login
+ *  PW-05 - a wrong old password without a signed in user (expired password) counts as a failed login
  *  PW-06 - a disabled or locked account is neither changed nor signed in without a signed in user
  *  PW-07 - an operation that did not store the password (a workflow stopped it): no paex reset, no sign-in, no success
  *  PW-08 - the old password again is refused, also for a salted hash type
@@ -123,11 +124,24 @@ class eZRedirectManager
     public static function redirectTo( $module, $default ) { $module->redirectTo( $default ); return true; }
 }
 
+class eZError { const KERNEL_ACCESS_DENIED = 1; }
+
 class eZAudit { public static function writeAudit( $name, $data ) { PwLog::add( "audit:$name" ); } }
 
 class eZPaEx
 {
-    public static function getPaEx( $id ) { return new self(); }
+    /** @var array user id => true (expired), false (not expired); missing: no paex datatype */
+    public static $expired = array();
+    public $id;
+    public static function getPaEx( $id, $checkIfUserHasDatatype = false )
+    {
+        if ( $checkIfUserHasDatatype && !array_key_exists( (int)$id, self::$expired ) )
+            return null;
+        $paex = new self();
+        $paex->id = (int)$id;
+        return $paex;
+    }
+    public function isExpired() { return !empty( self::$expired[$this->id] ); }
     public function validatePassword( $password ) { return true; }
     public function resetPasswordLastUpdated() { PwLog::add( 'paexReset' ); }
 }
@@ -148,6 +162,7 @@ class PwModule
     public function redirectTo( $uri ) { $this->redirect = $uri; return 'redirected'; }
     public function setTitle( $title ) {}
     public function actionParameter( $name ) { return null; }
+    public function handleError( $code, $type ) { PwLog::add( "error:$type:$code" ); return 'error'; }
 }
 
 function pwRun( $currentID, $userID, array $post )
@@ -171,6 +186,7 @@ function pwReset()
     );
     eZUser::$locked = array();
     eZUserOperationCollection::$stop = false;
+    eZPaEx::$expired = array( 42 => true );
 }
 
 $change = array( 'OKButton' => '1', 'oldPassword' => 'old-secret', 'newPassword' => 'new-secret', 'confirmPassword' => 'new-secret' );
@@ -184,15 +200,33 @@ pwCheck( PwLog::has( 'operation:42' ) && !PwLog::has( 'setAttribute:password_has
 
 // PW-02
 pwReset();
-list( $module ) = pwRun( 14, 42, $change );
-pwCheck( PwLog::has( 'operation:42' ) && PwLog::has( 'paexReset' ) && !PwLog::has( 'signIn:' ) && !PwLog::has( 'lastVisit:' ),
-         'PW-02 another user\'s password: changed, the session is not handed over (' . implode( ' ', PwLog::$calls ) . ')' );
+list( $module, $result ) = pwRun( 14, 42, $change );
+pwCheck( $result === 'error' && PwLog::has( 'error:kernel:1' ) && !PwLog::has( 'operation:' ) && !PwLog::has( 'audit:' )
+         && !PwLog::has( 'signIn:' ) && !PwLog::has( 'failedLogin' ),
+         'PW-02 another user\'s password form: refused before the old password is checked (' . implode( ' ', PwLog::$calls ) . ')' );
+pwReset();
+list( $module, $result ) = pwRun( 14, 42, array() );
+pwCheck( $result === 'error' && PwLog::has( 'error:kernel:1' ), 'PW-02 another user\'s password form is not shown either' );
 
 // PW-03
 pwReset();
 list( $module ) = pwRun( 10, 42, $change );
 pwCheck( PwLog::has( 'operation:42' ) && PwLog::has( 'signIn:42' ) && PwLog::has( 'failedLogin:42:0' ),
          'PW-03 expired password, nobody signed in: signed in after the change, failed logins reset' );
+pwReset();
+eZPaEx::$expired = array( 42 => false );
+list( $module, $result ) = pwRun( 10, 42, $change );
+pwCheck( $result === 'error' && PwLog::has( 'error:kernel:1' ) && !PwLog::has( 'operation:' ) && !PwLog::has( 'signIn:' ) && !PwLog::has( 'failedLogin' ),
+         'PW-03 password not expired, nobody signed in: refused, no sign-in' );
+pwReset();
+eZPaEx::$expired = array();
+list( $module, $result ) = pwRun( 10, 42, $change );
+pwCheck( $result === 'error' && !PwLog::has( 'operation:' ) && !PwLog::has( 'signIn:' ),
+         'PW-03 account without password expiry, nobody signed in: refused, no sign-in' );
+pwReset();
+eZPaEx::$expired = array( 42 => false );
+list( $module, $result ) = pwRun( 42, 42, $change );
+pwCheck( PwLog::has( 'operation:42' ) && PwLog::has( 'paexReset' ), 'PW-03 a signed in user changes the own password whether it expired or not' );
 
 // PW-04
 pwReset();
@@ -219,9 +253,9 @@ pwCheck( !PwLog::has( 'failedLogin' ), 'PW-05 wrong old password of the signed i
 // PW-06
 pwReset();
 eZUser::$locked = array( 42 );
-list( $module ) = pwRun( 10, 42, $change );
-pwCheck( !PwLog::has( 'operation:' ) && !PwLog::has( 'signIn:' ) && $module->redirect === '/content/view/full/2',
-         'PW-06 locked account: not changed, not signed in' );
+list( $module, $result ) = pwRun( 10, 42, $change );
+pwCheck( $result === 'error' && !PwLog::has( 'operation:' ) && !PwLog::has( 'signIn:' ),
+         'PW-06 locked account: refused, not changed, not signed in' );
 pwReset();
 eZUser::$users[42]->data['enabled'] = false;
 pwRun( 10, 42, $change );

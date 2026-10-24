@@ -58,13 +58,21 @@ else
 
 $user = eZUser::fetch( $UserID );
 
-// The session takes the user only when it is the user's own: the user signed in, or nobody signed in
-// (a user whose password expired is sent here instead of being signed in, and proves the old password).
-// An account that is disabled or locked by failed logins is not signed in this way.
-$isOwnSession = $user && ( $currentUserID == $user->attribute( "contentobject_id" ) || !$currentUser->isRegistered() );
+// A signed in user changes the own password only, as in the kernel's user/password view.
+if ( $user && $currentUser->isRegistered() && $currentUserID != $user->attribute( "contentobject_id" ) )
+    return $Module->handleError( eZError::KERNEL_ACCESS_DENIED, 'kernel' );
+
+// Without a signed in user the form is the way in for a user whose password expired (the login handler
+// sends that user here instead of signing in), and it signs the user in after the change. Only for an
+// expired password of an account that may sign in; it is no way around the login form for other accounts.
 $signsIn = $user && !$currentUser->isRegistered();
-if ( $signsIn && ( !$user->isEnabled() || !eZUser::isEnabledAfterFailedLogin( $UserID ) ) )
-    $user = false;
+if ( $signsIn )
+{
+    $expiryPaex = eZPaEx::getPaEx( $UserID, true );
+    if ( !$expiryPaex instanceof eZPaEx || !$expiryPaex->isExpired()
+         || !$user->isEnabled() || !eZUser::isEnabledAfterFailedLogin( $UserID ) )
+        return $Module->handleError( eZError::KERNEL_ACCESS_DENIED, 'kernel' );
+}
 
 if ( $http->hasPostVariable( "OKButton" ) && $user )
 {
@@ -147,14 +155,12 @@ if ( $http->hasPostVariable( "OKButton" ) && $user )
 
                         $paex->resetPasswordLastUpdated();
 
-                        if ( $isOwnSession )
-                        {
-                            eZUser::setCurrentlyLoggedInUser( $stored, $UserID );
-                            eZUser::updateLastVisit( $UserID, true );
-                            // a sign-in that succeeds starts the count of failed logins again
-                            if ( $signsIn )
-                                eZUser::setFailedLoginAttempts( $UserID, 0 );
-                        }
+                        // the session is the user's own (see above): signed in with the new password
+                        eZUser::setCurrentlyLoggedInUser( $stored, $UserID );
+                        eZUser::updateLastVisit( $UserID, true );
+                        // a sign-in that succeeds starts the count of failed logins again
+                        if ( $signsIn )
+                            eZUser::setFailedLoginAttempts( $UserID, 0 );
 
                         // What the kernel does after a password change, where it can: end the user's other
                         // sessions, tell the user by mail, clear "change password at next sign-in"
