@@ -19,16 +19,28 @@ $newPasswordNotMatch = 0;
 $newPasswordTooShort = 0;
 $newPasswordNotValidate = 0;
 $newPasswordMustDiffer = 0;
-$userRedirectURI = '';
 
-$userRedirectURI = $Module->actionParameter( 'UserRedirectURI' );
-
-if ( $http->hasSessionVariable( "LastAccessesURI" ) )
-     $userRedirectURI = $http->sessionVariable( "LastAccessesURI" );
-
-$redirectionURI = $userRedirectURI;
-if ( $redirectionURI == '' )
-     $redirectionURI = $ini->variable( 'SiteSettings', 'DefaultPage' );
+// Where the view goes after a change or a cancel: the page the form names, else the page viewed
+// before the form, else the default page. A posted page is only taken when it passes the rules of
+// eZRedirectManager::returnURI() (no other host, no script URL, not this form again); a kernel
+// without returnURI() ignores the posted page.
+$defaultURI = $ini->variable( 'SiteSettings', 'DefaultPage' );
+$redirectBack = function( array $postNames ) use ( $Module, $http, $defaultURI )
+{
+    if ( method_exists( 'eZRedirectManager', 'returnURI' ) )
+    {
+        $preferred = array();
+        foreach ( $postNames as $name )
+        {
+            $value = $http->hasPostVariable( $name ) ? $http->postVariable( $name ) : null;
+            if ( is_string( $value ) && trim( $value ) !== '' )
+                $preferred[] = trim( $value );
+        }
+        return $Module->redirectTo( eZRedirectManager::returnURI( $Module, $defaultURI, $preferred ) );
+    }
+    eZRedirectManager::redirectTo( $Module, $defaultURI );
+    return null;
+};
 
 if( !isset( $oldPassword ) )
     $oldPassword = '';
@@ -46,7 +58,15 @@ else
 
 $user = eZUser::fetch( $UserID );
 
-if ( $http->hasPostVariable( "OKButton" ) && $user)
+// The session takes the user only when it is the user's own: the user signed in, or nobody signed in
+// (a user whose password expired is sent here instead of being signed in, and proves the old password).
+// An account that is disabled or locked by failed logins is not signed in this way.
+$isOwnSession = $user && ( $currentUserID == $user->attribute( "contentobject_id" ) || !$currentUser->isRegistered() );
+$signsIn = $user && !$currentUser->isRegistered();
+if ( $signsIn && ( !$user->isEnabled() || !eZUser::isEnabledAfterFailedLogin( $UserID ) ) )
+    $user = false;
+
+if ( $http->hasPostVariable( "OKButton" ) && $user )
 {
     if ( $http->hasPostVariable( "oldPassword" ) )
     {
@@ -60,6 +80,9 @@ if ( $http->hasPostVariable( "OKButton" ) && $user)
     {
         $confirmPassword = $http->postVariable( "confirmPassword" );
     }
+    if ( !is_string( $oldPassword ) ) $oldPassword = '';
+    if ( !is_string( $newPassword ) ) $newPassword = '';
+    if ( !is_string( $confirmPassword ) ) $confirmPassword = '';
 
     $login = $user->attribute( "login" );
     $type = $user->attribute( "password_hash_type" );
@@ -89,42 +112,78 @@ if ( $http->hasPostVariable( "OKButton" ) && $user)
                                                                                   'Comment: ' => 'Password not pass PAEX validation' ) );
                     $newPasswordNotValidate = 1;
                 }
+                // The new password is the old one when it matches the stored hash (comparing two new hashes
+                // fails for salted hash types)
+                else if ( $user->authenticateHash( $login, $newPassword, $site, $type, $hash ) )
+                {
+                    // if audit is enabled password changes should be logged
+                    eZAudit::writeAudit( 'user-password-change-self-fail', array( 'UserID: ' => $UserID, 'Login: ' => $login,
+                                                                                  'Comment: ' => 'New and old password are the same' ) );
+                    $newPasswordMustDiffer = 1;
+                }
                 else
                 {
-                    $oldHash = $user->createHash( $login, $oldPassword, $site, $type );
-                    $newHash = $user->createHash( $login, $newPassword, $site, $type );
-                    if ($oldHash == $newHash)
+                    // Through the kernel's user/password operation, as user/password does: the current hash
+                    // type, the user draft, the content cache and the workflows of the operation
+                    if ( eZOperationHandler::operationIsAvailable( 'user_password' ) )
                     {
-                        // if audit is enabled password changes should be logged
-                        eZAudit::writeAudit( 'user-password-change-self-fail', array( 'UserID: ' => $UserID, 'Login: ' => $login,
-                                                                                      'Comment: ' => 'New and old password are the same' ) );
-                        $newPasswordMustDiffer = 1;
+                        eZOperationHandler::execute( 'user', 'password', array( 'user_id' => $UserID,
+                                                                                'new_password' => $newPassword ) );
                     }
                     else
+                    {
+                        eZUserOperationCollection::password( $UserID, $newPassword );
+                    }
+
+                    // the stored hash says whether it went through (a workflow can stop the operation)
+                    $stored = eZUser::fetch( $UserID );
+                    if ( $stored instanceof eZUser
+                         && $stored->authenticateHash( $login, $newPassword, $stored->site(),
+                                                       $stored->attribute( "password_hash_type" ),
+                                                       $stored->attribute( "password_hash" ) ) )
                     {
                         // if audit is enabled password changes should be logged
                         eZAudit::writeAudit( 'user-password-change-self', array( 'UserID: ' => $UserID, 'Login: ' => $login ) );
 
-                        $user->setAttribute( "password_hash", $newHash );
-                        $user->store();
                         $paex->resetPasswordLastUpdated();
-                        $oldPassword = '';
 
-                        eZUser::setCurrentlyLoggedInUser( $user, $UserID );
-                        eZUser::updateLastVisit( $UserID, true );
-
-                        if ( $http->hasPostVariable( "RedirectOnChange" ) )
+                        if ( $isOwnSession )
                         {
-                            return $Module->redirectTo( $http->postVariable( "RedirectOnChange" ) );
+                            eZUser::setCurrentlyLoggedInUser( $stored, $UserID );
+                            eZUser::updateLastVisit( $UserID, true );
+                            // a sign-in that succeeds starts the count of failed logins again
+                            if ( $signsIn )
+                                eZUser::setFailedLoginAttempts( $UserID, 0 );
                         }
-                        eZRedirectManager::redirectTo( $Module, $redirectionURI );
-                        return;
+
+                        // What the kernel does after a password change, where it can: end the user's other
+                        // sessions, tell the user by mail, clear "change password at next sign-in"
+                        if ( class_exists( 'expPasswordPolicy' ) && method_exists( 'expPasswordPolicy', 'endOtherSessions' ) )
+                        {
+                            $policy = new expPasswordPolicy( $ini );
+                            $sessionsEnded = $policy->endOtherSessions( (int)$UserID );
+                            if ( method_exists( $policy, 'sendChangedMail' ) )
+                                $policy->sendChangedMail( $stored, $sessionsEnded,
+                                                          method_exists( 'expPasswordPolicy', 'stampCheckEnabled' ) && expPasswordPolicy::stampCheckEnabled() );
+                        }
+                        if ( class_exists( 'expPasswordChangeRequired' ) && method_exists( 'expPasswordChangeRequired', 'clear' ) )
+                            expPasswordChangeRequired::clear( $stored, 'password' );
+
+                        return $redirectBack( array( 'RedirectOnChange' ) );
                     }
+
+                    eZAudit::writeAudit( 'user-password-change-self-fail', array( 'UserID: ' => $UserID, 'Login: ' => $login,
+                                                                                  'Comment: ' => 'Password could not be stored' ) );
+                    // no flag names this failure: show no message rather than "successfully updated"
+                    $message = 0;
                 }
             }
-            $newPassword = '';
-            $confirmPassword = '';
-            $message = true;
+            if ( $newPasswordNotValidate || $newPasswordMustDiffer )
+            {
+                $newPassword = '';
+                $confirmPassword = '';
+                $message = true;
+            }
         }
         else
         {
@@ -142,6 +201,9 @@ if ( $http->hasPostVariable( "OKButton" ) && $user)
         // if audit is enabled password changes should be logged
         eZAudit::writeAudit( 'user-password-change-self-fail', array( 'UserID: ' => $UserID, 'Login: ' => $login,
                                                                       'Comment: ' => 'Old password incorrect' ) );
+        // Without a signed in user this form is a sign-in: a wrong password counts as a failed login
+        if ( $signsIn )
+            eZUser::setFailedLoginAttempts( $UserID );
         $oldPassword = "";
         $oldPasswordNotValid = 1;
         $message = true;
@@ -150,13 +212,13 @@ if ( $http->hasPostVariable( "OKButton" ) && $user)
 
 if ( $http->hasPostVariable( "CancelButton" ) || !$user )
 {
-    if ( $http->hasPostVariable( "RedirectOnCancel" ) )
-    {
-        return $Module->redirectTo( $http->postVariable( "RedirectOnCancel" ) );
-    }
-    eZRedirectManager::redirectTo( $Module, $redirectionURI );
-    return;
+    return $redirectBack( array( 'RedirectOnCancel' ) );
 }
+
+// a typed password is never written back into the page
+$oldPassword = '';
+$newPassword = '';
+$confirmPassword = '';
 
 $Module->setTitle( "Edit user information" );
 // Template handling
