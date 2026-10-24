@@ -19,6 +19,9 @@
  *  FP-07 - a password posted as an array is no password; no error
  *  FP-08 - the plain form (no key in the address) gives no deprecation
  *  FP-09 - a kernel without expPasswordPolicy and expPasswordChangeRequired: the password is still changed
+ *  FP-10 - without the user_password operation the view calls eZUserOperationCollection::password()
+ *  FP-11 - the key is removed before anything else runs after the change: a failing paex reset leaves no usable key
+ *  FP-12 - demo mode protects the account: the key is removed and refused, nothing is changed
  */
 
 $withoutPolicy = in_array( '--without-policy', $argv, true );
@@ -109,9 +112,11 @@ class eZUserOperationCollection
 
 class eZOperationHandler
 {
-    public static function operationIsAvailable( $name ) { return $name === 'user_password'; }
+    public static $available = true;
+    public static function operationIsAvailable( $name ) { return self::$available && $name === 'user_password'; }
     public static function execute( $module, $operation, $params )
     {
+        FpLog::add( "handler:$module/$operation" );
         if ( $module === 'user' && $operation === 'password' )
             return eZUserOperationCollection::password( $params['user_id'], $params['new_password'] );
         return null;
@@ -132,6 +137,17 @@ if ( !$withoutPolicy )
         public static function stampCheckEnabled() { return false; }
     }
 
+    class expDemoMode
+    {
+        /** @var int[] user ids an active demo mode protects */
+        public static $protected = array();
+        public static function protectsPassword( $user )
+        {
+            return $user instanceof eZUser && in_array( (int)$user->attribute( 'contentobject_id' ), self::$protected, true );
+        }
+        public static function refused( $user, $path, $event = 'access.user.password.change.failed' ) { FpLog::add( "demoRefused:$user:$path" ); }
+    }
+
     class expPasswordChangeRequired
     {
         public static function clear( $user, $source = 'password' )
@@ -148,7 +164,13 @@ class eZPaEx
 {
     public static function getPaEx( $id, $checkIfUserHasDatatype = false ) { return new self(); }
     public function validatePassword( $password ) { return true; }
-    public function resetPasswordLastUpdated() { FpLog::add( 'paexReset' ); }
+    public static $fail = false;
+    public function resetPasswordLastUpdated()
+    {
+        if ( self::$fail )
+            throw new RuntimeException( 'paex store failed' );
+        FpLog::add( 'paexReset' );
+    }
 }
 
 class eZTemplate
@@ -211,6 +233,10 @@ function fpReset()
         $orphanKey => new eZForgotPassword( array( 'user_id' => 99, 'hash_key' => $orphanKey, 'time' => time() - 60 ) ),
     );
     eZUserOperationCollection::$stop = false;
+    eZOperationHandler::$available = true;
+    eZPaEx::$fail = false;
+    if ( class_exists( 'expDemoMode', false ) )
+        expDemoMode::$protected = array();
 }
 
 function fpStoredPassword( $password )
@@ -234,7 +260,7 @@ if ( $withoutPolicy )
 // FP-01
 fpReset();
 fpRun( $validKey, 'ChangePassword', $change );
-fpCheck( FpLog::has( 'operation:42' ) && !FpLog::has( 'setAttribute:password_hash' ) && fpStoredPassword( 'new-secret' )
+fpCheck( FpLog::has( 'handler:user/password' ) && FpLog::has( 'operation:42' ) && !FpLog::has( 'setAttribute:password_hash' ) && fpStoredPassword( 'new-secret' )
          && FpLog::has( 'paexReset' ) && FpLog::has( 'keyRemoved' ) && !isset( eZForgotPassword::$keys[$validKey] )
          && FpLog::has( 'sessionsEnded:42' ) && FpLog::has( 'changedMail:42:2' ) && FpLog::has( 'changeRequiredCleared:42:forgotpassword' )
          && !FpLog::has( 'signIn:' ) && eZTemplate::$vars['password_changed'] === true,
@@ -293,6 +319,35 @@ fpCheck( !FpLog::has( 'error:' ) && !FpLog::has( 'operation:' ) && eZTemplate::$
 fpReset();
 fpRun( null );
 fpCheck( !$notices && !FpLog::has( 'error:' ), 'FP-08 the plain form gives no deprecation (' . implode( ' | ', $notices ) . ')' );
+
+// FP-10
+fpReset();
+eZOperationHandler::$available = false;
+fpRun( $validKey, 'ChangePassword', $change );
+fpCheck( !FpLog::has( 'handler:' ) && FpLog::has( 'operation:42' ) && fpStoredPassword( 'new-secret' ) && FpLog::has( 'keyRemoved' )
+         && eZTemplate::$vars['password_changed'] === true,
+         'FP-10 without the operation: eZUserOperationCollection::password() (' . FpLog::text() . ')' );
+
+// FP-11
+fpReset();
+eZPaEx::$fail = true;
+fpRun( $validKey, 'ChangePassword', $change );
+fpCheck( fpStoredPassword( 'new-secret' ) && FpLog::has( 'keyRemoved' ) && !isset( eZForgotPassword::$keys[$validKey] ),
+         'FP-11 a failing paex reset after the change leaves no usable key (' . FpLog::text() . ')' );
+
+// FP-12
+fpReset();
+expDemoMode::$protected = array( 42 );
+fpRun( $validKey );
+fpCheck( FpLog::has( 'keyRemoved' ) && FpLog::has( 'demoRefused:42:' ) && eZTemplate::$vars['wrong_key'] === true
+         && eZTemplate::$vars['password_form'] === false,
+         'FP-12 demo mode: the key of a protected account is removed and refused (' . FpLog::text() . ')' );
+fpReset();
+expDemoMode::$protected = array( 42 );
+fpRun( $validKey, 'ChangePassword', $change );
+fpCheck( !FpLog::has( 'operation:' ) && fpStoredPassword( 'old-secret' ) && !isset( eZForgotPassword::$keys[$validKey] )
+         && eZTemplate::$vars['wrong_key'] === true && eZTemplate::$vars['password_changed'] === false,
+         'FP-12 demo mode: posting the form changes nothing (' . FpLog::text() . ')' );
 
 // FP-09
 $output = array();

@@ -59,6 +59,18 @@ if ( strlen( $hashKey ) == 32 )
         $forgotPasswdObj->remove();
         $tpl->setVariable( 'wrong_key', true );
     }
+    elseif ( class_exists( 'expDemoMode' ) && method_exists( 'expDemoMode', 'protectsPassword' )
+             && expDemoMode::protectsPassword( eZUser::fetch( $forgotPasswdObj->attribute( 'user_id' ) ) ) )
+    {
+        // Demo mode of the kernel: an administrator's password cannot be reset. The key (made before the mode was
+        // switched on) is removed and refused, as in the kernel's user/forgotpassword; the user/password operation
+        // would refuse the change anyway
+        if ( method_exists( 'expDemoMode', 'refused' ) )
+            expDemoMode::refused( (int)$forgotPasswdObj->attribute( 'user_id' ), 'userpaex/forgotpassword', 'access.user.password.reset.failed' );
+
+        $forgotPasswdObj->remove();
+        $tpl->setVariable( 'wrong_key', true );
+    }
     else // HashKey OK -> show/process change password form
     {
         $tpl->setVariable( 'password_form', true );
@@ -256,10 +268,10 @@ else if ( $module->isCurrentAction( "ChangePassword" ) && $hashKeyValidated )
                     eZAudit::writeAudit( 'user-forgotpassword', array( 'UserID' => $UserID, 'Login' => $login,
                                                                        'Comment: ' => 'Password changed successfully' ) );
 
-                    $paex->resetPasswordLastUpdated();
-
-                    // the key works once
+                    // the key works once: removed first, so nothing that fails below leaves it usable
                     $forgotPasswdObj->remove();
+
+                    $paex->resetPasswordLastUpdated();
 
                     // What the kernel does after a password change, where it can: end the user's sessions (this
                     // request is not one of them, nobody is signed in by this view), tell the user by mail, clear
