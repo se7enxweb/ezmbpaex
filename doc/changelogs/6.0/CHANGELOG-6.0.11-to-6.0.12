@@ -1,0 +1,14 @@
+Changes from 6.0.11 to 6.0.12 (2026-10-26)
+
+- Fixed: Translations that contradicted their language guide: wrong meanings, glossary breaches, forms of address,
+  typos and English left in the text, from ekked's pull request #4.
+- Fixed: userpaex/forgotpassword removes the key right after the change and refuses keys of accounts the demo mode
+  protects, from ekked's pull request #6.
+- Fixed: userpaex/forgotpassword sets the new password through the user/password operation, compares it with the
+  stored hash, and ends the sessions of the account, from ekked's pull request #6.
+- Fixed: The password view refuses another user's form, and signs in without a signed in user only for an expired
+  password, from ekked's pull request #5.
+- Fixed: The password view changes the password through the kernel and signs in only the session's own user, from
+  ekked's pull request #5.
+
+Upgrading: nothing to do beyond composer update; no setting or database change.
