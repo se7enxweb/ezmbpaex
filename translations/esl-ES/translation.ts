@@ -211,7 +211,7 @@
     </message>
     <message>
         <source>Update children nodes?</source>
-        <translation>¿Actualizar nodos hijos?</translation>
+        <translation>¿Actualizar nudos hijos?</translation>
     </message>
     <message>
         <source>undefined</source>
@@ -262,7 +262,7 @@
     </message>
     <message>
         <source>OK</source>
-        <translation>OK</translation>
+        <translation>De acuerdo</translation>
     </message>
     <message>
         <source>Cancel</source>
