@@ -199,7 +199,7 @@
     </message>
     <message>
         <source>Current password status:</source>
-        <translation>Satut actuel du mot de passe:</translation>
+        <translation>Statut actuel du mot de passe :</translation>
     </message>
     <message>
         <source>expired</source>
@@ -285,7 +285,7 @@
     <name>mbpaex/userpaex/forgotpassword</name>
     <message>
         <source>A mail has been sent to the following email address: %1. This email contains a link you need to click so that we can confirm that the correct user is getting the new password.</source>
-        <translation>Un courrier électronique a été envoyé à l&apos;adresse suivante: %1. Ce courrier contient un lien sur lequel vous devez cliquer pour confirmer que le bon utilisateur reçoit le nouveau mot de passe.</translation>
+        <translation>Un courrier électronique a été envoyé à l&apos;adresse suivante : %1. Ce courrier contient un lien sur lequel vous devez cliquer pour confirmer que le bon utilisateur reçoit le nouveau mot de passe.</translation>
     </message>
     <message>
         <source>There is no registered user with that email address.</source>
@@ -325,7 +325,7 @@
     </message>
     <message>
         <source>Have you forgotten your password?</source>
-        <translation>Vous avez oublié votre mot de passe?</translation>
+        <translation>Vous avez oublié votre mot de passe ?</translation>
     </message>
     <message>
         <source>If you have forgotten your password we can generate a new one for you. All you need to do is to enter your email address and we will create a new password for you.</source>
