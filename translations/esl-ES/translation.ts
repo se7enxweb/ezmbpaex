@@ -5,158 +5,158 @@
     <name>design/admin/content/edit</name>
     <message>
         <source>View and manage (copy, delete, etc.) the versions of this object.</source>
-        <translation type="unfinished"></translation>
+        <translation>Ver y gestionar (copiar, eliminar, etc.) las versiones de este objeto.</translation>
     </message>
     <message>
         <source>Manage versions</source>
-        <translation type="unfinished"></translation>
+        <translation>Gestionar versiones</translation>
     </message>
 </context>
 <context>
     <name>design/admin/node/view/full</name>
     <message>
         <source>Last modified</source>
-        <translation type="unfinished"></translation>
+        <translation>Última modificación</translation>
     </message>
     <message>
         <source>Node ID</source>
-        <translation type="unfinished"></translation>
+        <translation>ID del nudo</translation>
     </message>
     <message>
         <source>Object ID</source>
-        <translation type="unfinished"></translation>
+        <translation>ID del objeto</translation>
     </message>
     <message>
         <source>Another language</source>
-        <translation type="unfinished"></translation>
+        <translation>Otro idioma</translation>
     </message>
     <message>
         <source>Edit</source>
-        <translation type="unfinished"></translation>
+        <translation>Editar</translation>
     </message>
     <message>
         <source>Edit the contents of this item.</source>
-        <translation type="unfinished"></translation>
+        <translation>Editar el contenido de este elemento.</translation>
     </message>
     <message>
         <source>Not available</source>
-        <translation type="unfinished"></translation>
+        <translation>No disponible</translation>
     </message>
     <message>
         <source>Move</source>
-        <translation type="unfinished"></translation>
+        <translation>Mover</translation>
     </message>
     <message>
         <source>Move this item to another location.</source>
-        <translation type="unfinished"></translation>
+        <translation>Mover este elemento a otra ubicación.</translation>
     </message>
     <message>
         <source>Remove</source>
-        <translation type="unfinished"></translation>
+        <translation>Eliminar</translation>
     </message>
     <message>
         <source>Remove this item.</source>
-        <translation type="unfinished"></translation>
+        <translation>Eliminar este elemento.</translation>
     </message>
     <message>
         <source>Preview</source>
-        <translation type="unfinished"></translation>
+        <translation>Vista previa</translation>
     </message>
     <message>
         <source>You do not have permission to edit this item.</source>
-        <translation type="unfinished"></translation>
+        <translation>No tienes permiso para editar este elemento.</translation>
     </message>
     <message>
         <source>You do not have permission to move this item to another location.</source>
-        <translation type="unfinished"></translation>
+        <translation>No tienes permiso para mover este elemento a otra ubicación.</translation>
     </message>
     <message>
         <source>You do not have permission to remove this item.</source>
-        <translation type="unfinished"></translation>
+        <translation>No tienes permiso para eliminar este elemento.</translation>
     </message>
     <message>
         <source>New translation</source>
-        <translation type="unfinished"></translation>
+        <translation>Nueva traducción</translation>
     </message>
 </context>
 <context>
     <name>design/admin/pagelayout</name>
     <message>
         <source>Current user</source>
-        <translation type="unfinished"></translation>
+        <translation>Usuario actual</translation>
     </message>
     <message>
         <source>Change name, email, password, etc.</source>
-        <translation type="unfinished"></translation>
+        <translation>Cambiar nombre, email, contraseña, etc.</translation>
     </message>
     <message>
         <source>Change information</source>
-        <translation type="unfinished"></translation>
+        <translation>Cambiar información</translation>
     </message>
     <message>
         <source>Change user info</source>
-        <translation type="unfinished"></translation>
+        <translation>Cambiar información de usuario</translation>
     </message>
     <message>
         <source>Change password for &lt;%username&gt;.</source>
-        <translation type="unfinished"></translation>
+        <translation>Cambiar contraseña para &lt;%username&gt;.</translation>
     </message>
     <message>
         <source>Change password</source>
-        <translation type="unfinished">Cambiar contraseña</translation>
+        <translation>Cambiar contraseña</translation>
     </message>
     <message>
         <source>There is %basket_count item in the shopping basket.</source>
-        <translation type="unfinished"></translation>
+        <translation>Hay %basket_count elemento en la cesta de la compra.</translation>
     </message>
     <message>
         <source>Shopping basket (%basket_count)</source>
-        <translation type="unfinished"></translation>
+        <translation>Cesta de la compra (%basket_count)</translation>
     </message>
     <message>
         <source>There are %basket_count items in the shopping basket.</source>
-        <translation type="unfinished"></translation>
+        <translation>Hay %basket_count elementos en la cesta de la compra.</translation>
     </message>
     <message>
         <source>Logout from the system.</source>
-        <translation type="unfinished"></translation>
+        <translation>Desconectar del sistema.</translation>
     </message>
     <message>
         <source>Logout</source>
-        <translation type="unfinished"></translation>
+        <translation>Desconectar</translation>
     </message>
 </context>
 <context>
     <name>design/standard/user/forgotpassword</name>
     <message>
         <source>Email</source>
-        <translation type="unfinished">Correo electrónico</translation>
+        <translation>Correo electrónico</translation>
     </message>
     <message>
         <source>Your account information</source>
-        <translation type="unfinished"></translation>
+        <translation>Tu información de cuenta</translation>
     </message>
 </context>
 <context>
     <name>kernel/user</name>
     <message>
         <source>Change password</source>
-        <translation type="unfinished">Cambiar contraseña</translation>
+        <translation>Cambiar contraseña</translation>
     </message>
     <message>
         <source>User</source>
-        <translation type="unfinished"></translation>
+        <translation>Usuario</translation>
     </message>
     <message>
         <source>Forgot password</source>
-        <translation type="unfinished"></translation>
+        <translation>Contraseña olvidada</translation>
     </message>
 </context>
 <context>
     <name>kernel/user/register</name>
     <message>
         <source>Registration info</source>
-        <translation type="unfinished"></translation>
+        <translation>Información de registro</translation>
     </message>
 </context>
 <context>
@@ -164,23 +164,23 @@
     <message>
         <source>Password Expiration</source>
         <comment>Datatype name</comment>
-        <translation type="unfinished">Caducidad de Contraseña</translation>
+        <translation>Caducidad de la contraseña</translation>
     </message>
     <message>
         <source>The password lifetime must be an integer &gt;= 0</source>
-        <translation type="unfinished">El tiempo de vida de la contraseña debe ser un número &gt;= 0</translation>
+        <translation>La vida útil de la contraseña debe ser un número entero &gt;= 0</translation>
     </message>
     <message>
         <source>The expiration notification time must be an integer &gt;= 86400</source>
-        <translation type="unfinished">El tiempo de notificación de expiración debe ser un número &gt;= 86400</translation>
+        <translation>El tiempo de aviso de caducidad debe ser un número entero &gt;= 86400</translation>
     </message>
     <message>
         <source>The password doesn&apos;t match the validation rule.</source>
-        <translation type="unfinished">La contraseña no respeta la regla de validación.</translation>
+        <translation>La contraseña no cumple la regla de validación.</translation>
     </message>
     <message>
         <source>Wrong value in updatechildren field</source>
-        <translation type="unfinished">Valor incorrecto en el campo updatechildren</translation>
+        <translation>Valor incorrecto en el campo updatechildren</translation>
     </message>
 </context>
 <context>
@@ -270,7 +270,7 @@
     </message>
     <message>
         <source>Your password is about to expire</source>
-        <translation type="unfinished">Tu contraseña está a punto de caducar</translation>
+        <translation>Tu contraseña está a punto de caducar</translation>
     </message>
     <message>
         <source>%siteurl your password is about to expire</source>
