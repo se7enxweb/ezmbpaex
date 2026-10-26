@@ -21,7 +21,8 @@ $tpl->setVariable( 'newPasswordNotMatch', false );
 
 $http = eZHTTPTool::instance();
 $module = $Params["Module"];
-$hashKey = $Params["HashKey"];
+// No key in the address (the plain form) arrives as null: treat it as an empty key
+$hashKey = (string)( $Params["HashKey"] ?? '' );
 $hashKeyValidated = false;
 $mbpaex_ini = eZINI::instance('mbpaex.ini');
 $forgotPasswdHashLifeTime = $mbpaex_ini->variable( "mbpaexSettings", "ForgotPasswordHashLifeTime" );
@@ -47,6 +48,27 @@ if ( strlen( $hashKey ) == 32 )
                                                                 'Comment' => 'HashKey expired, proceed to remove' ) );
 
         $forgotPasswdObj->remove(); // Remove expired hash
+        $tpl->setVariable( 'wrong_key', true );
+    }
+    elseif ( !eZUser::fetch( $forgotPasswdObj->attribute( 'user_id' ) ) instanceof eZUser ) // the account is gone
+    {
+        // if audit is enabled password changes should be logged
+        eZAudit::writeAudit( 'user-forgotpassword-fail', array( 'HashKey' => $hashKey,
+                                                                'Comment' => 'User of the HashKey not found, proceed to remove' ) );
+
+        $forgotPasswdObj->remove();
+        $tpl->setVariable( 'wrong_key', true );
+    }
+    elseif ( class_exists( 'expDemoMode' ) && method_exists( 'expDemoMode', 'protectsPassword' )
+             && expDemoMode::protectsPassword( eZUser::fetch( $forgotPasswdObj->attribute( 'user_id' ) ) ) )
+    {
+        // Demo mode of the kernel: an administrator's password cannot be reset. The key (made before the mode was
+        // switched on) is removed and refused, as in the kernel's user/forgotpassword; the user/password operation
+        // would refuse the change anyway
+        if ( method_exists( 'expDemoMode', 'refused' ) )
+            expDemoMode::refused( (int)$forgotPasswdObj->attribute( 'user_id' ), 'userpaex/forgotpassword', 'access.user.password.reset.failed' );
+
+        $forgotPasswdObj->remove();
         $tpl->setVariable( 'wrong_key', true );
     }
     else // HashKey OK -> show/process change password form
@@ -176,6 +198,10 @@ else if ( $module->isCurrentAction( "ChangePassword" ) && $hashKeyValidated )
     else
         $confirmPassword = false;
 
+    // A form can post these as arrays; treat that as not given
+    if ( !is_string( $newPassword ) ) $newPassword = '';
+    if ( !is_string( $confirmPassword ) ) $confirmPassword = '';
+
     // The forgotPasswdObj was previously validated, fetch the corresponding user object
     $UserID = $forgotPasswdObj->attribute( 'user_id' );
     $user = eZUser::fetch($UserID);
@@ -184,7 +210,8 @@ else if ( $module->isCurrentAction( "ChangePassword" ) && $hashKeyValidated )
     $hash = $user->attribute( "password_hash" );
     $site = $user->site();
 
-    if (  $newPassword ==  $confirmPassword )
+    // strict: with == two different numeric strings ("1e3", "1000") would count as the same password
+    if (  $newPassword === $confirmPassword )
     {
         if ( !$user->validatePassword($newPassword) ) // Password must meet "old" validation rules
         {
@@ -206,29 +233,68 @@ else if ( $module->isCurrentAction( "ChangePassword" ) && $hashKeyValidated )
 
                 $tpl->setVariable( 'newPasswordNotValidate', true);
             }
+            // The new password is the old one when it matches the stored hash (comparing a new hash with the
+            // stored one fails for salted hash types)
+            else if ( $user->authenticateHash( $login, $newPassword, $site, $type, $hash ) )
+            {
+                // if audit is enabled password changes should be logged
+                eZAudit::writeAudit( 'user-forgotpassword-fail', array( 'UserID' => $UserID, 'Login' => $login,
+                                                                        'Comment: ' => 'New and old password are the same' ) );
+
+                $tpl->setVariable( 'newPasswordMustDiffer', true);
+            }
             else
             {
-                $newHash = $user->createHash( $login, $newPassword, $site, $type );
-                if ($newHash == $user->attribute('password_hash'))
+                // Through the kernel's user/password operation, as user/password does: the current hash type,
+                // the user draft, the content cache and the workflows of the operation
+                if ( eZOperationHandler::operationIsAvailable( 'user_password' ) )
                 {
-                    // if audit is enabled password changes should be logged
-                    eZAudit::writeAudit( 'user-forgotpassword-fail', array( 'UserID' => $UserID, 'Login' => $login,
-                                                                            'Comment: ' => 'New and old password are the same' ) );
-
-                    $tpl->setVariable( 'newPasswordMustDiffer', true);
+                    eZOperationHandler::execute( 'user', 'password', array( 'user_id' => $UserID,
+                                                                            'new_password' => $newPassword ) );
                 }
                 else
+                {
+                    eZUserOperationCollection::password( $UserID, $newPassword );
+                }
+
+                // the stored hash says whether it went through (a workflow can stop the operation)
+                $stored = eZUser::fetch( $UserID );
+                if ( $stored instanceof eZUser
+                     && $stored->authenticateHash( $login, $newPassword, $stored->site(),
+                                                   $stored->attribute( "password_hash_type" ),
+                                                   $stored->attribute( "password_hash" ) ) )
                 {
                     // if audit is enabled password changes should be logged
                     eZAudit::writeAudit( 'user-forgotpassword', array( 'UserID' => $UserID, 'Login' => $login,
                                                                        'Comment: ' => 'Password changed successfully' ) );
 
-                    $user->setAttribute( "password_hash", $newHash );
-                    $user->store();
+                    // the key works once: removed first, so nothing that fails below leaves it usable
+                    $forgotPasswdObj->remove();
+
                     $paex->resetPasswordLastUpdated();
 
-                    $forgotPasswdObj->remove();
+                    // What the kernel does after a password change, where it can: end the user's sessions (this
+                    // request is not one of them, nobody is signed in by this view), tell the user by mail, clear
+                    // "change password at next sign-in"
+                    if ( class_exists( 'expPasswordPolicy' ) && method_exists( 'expPasswordPolicy', 'endOtherSessions' ) )
+                    {
+                        $policy = new expPasswordPolicy( $ini );
+                        $sessionsEnded = $policy->endOtherSessions( (int)$UserID );
+                        if ( method_exists( $policy, 'sendChangedMail' ) )
+                            $policy->sendChangedMail( $stored, $sessionsEnded,
+                                                      method_exists( 'expPasswordPolicy', 'stampCheckEnabled' ) && expPasswordPolicy::stampCheckEnabled() );
+                    }
+                    if ( class_exists( 'expPasswordChangeRequired' ) && method_exists( 'expPasswordChangeRequired', 'clear' ) )
+                        expPasswordChangeRequired::clear( $stored, 'forgotpassword' );
+
                     $tpl->setVariable( 'password_changed', true);
+                }
+                else
+                {
+                    // the key stays, the form is shown again; no flag names this failure, so no message rather
+                    // than "changed successfully"
+                    eZAudit::writeAudit( 'user-forgotpassword-fail', array( 'UserID' => $UserID, 'Login' => $login,
+                                                                            'Comment: ' => 'Password could not be stored' ) );
                 }
             }
         }
