@@ -1,0 +1,5 @@
+Changes from 6.0.12 to 6.0.13 (2026-10-28)
+
+- Updated: The cat-ES and esl-ES translations are complete.
+
+Upgrading: composer update; clear the translation cache.
